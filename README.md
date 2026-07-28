@@ -32,7 +32,54 @@ state, so you can look away entirely.
 If `jq` is missing the hook exits silently and writes nothing. That is
 deliberate: a broken HUD must never disturb a Claude Code session.
 
-## Install
+## Install with Claude Code
+
+You already have an agent that can do this for you. Paste the prompt below into
+Claude Code and it will follow the manual steps for you — carefully, because the
+prompt tells it how.
+
+Read it before you send it. It is deliberately explicit about the one dangerous
+part: your `~/.claude/settings.json` holds your own settings, and it must be
+merged, never overwritten.
+
+````text
+Install Claude HUD from https://github.com/jenz26/claude-hud on this machine.
+
+Read the repository README first and follow it. Before you start, check that
+Git Bash and jq are available. If jq is missing, stop and tell me how to
+install it rather than working around it.
+
+What to do:
+
+1. Download claude-hud.sh and claude-hud-widget.ps1 from the repo and put them
+   in ~/.claude/
+2. Register the seven hooks in ~/.claude/settings.json, using the JSON block
+   from the README
+3. Put claude-hud.cmd on my Desktop
+4. Tell me how to start it and how to check that it works
+
+Rules for step 2, because that file holds my own configuration:
+
+- Back it up to ~/.claude/settings.json.bak before touching it
+- MERGE the hooks block, do not overwrite the file. If a "hooks" section
+  already exists with other events, add these alongside the existing ones and
+  leave everything else exactly as it is. If one of these seven events is
+  already wired to something else, stop and ask me instead of guessing
+- Show me the diff before writing
+- Validate the result with: jq . ~/.claude/settings.json
+  If it is not valid JSON, Claude Code discards the whole file silently and
+  nothing will work
+- Use "$HOME" in the hook commands, not "${CLAUDE_PROJECT_DIR}". These hooks
+  are global and must fire in every directory, and CLAUDE_PROJECT_DIR would
+  point at whatever project happens to be open
+
+If anything about my setup is not what the README expects, stop and ask me
+instead of guessing.
+````
+
+If you would rather do it by hand, the same steps are below.
+
+## Install by hand
 
 Four steps. Step 2 edits a file that may already hold your own settings, so read
 it before pasting.

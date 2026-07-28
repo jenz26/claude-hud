@@ -32,7 +32,54 @@ stato, così puoi guardare da un'altra parte.
 Se `jq` manca, l'hook esce in silenzio senza scrivere niente. È voluto: un HUD
 rotto non deve mai disturbare una sessione di Claude Code.
 
-## Installazione
+## Installazione con Claude Code
+
+Un agente che sa farlo ce l'hai già. Incolla il prompt qui sotto in Claude Code
+e ti esegue i passi manuali — con attenzione, perché è il prompt stesso a
+dirgli come.
+
+Leggilo prima di mandarlo. È volutamente esplicito sull'unico punto pericoloso:
+il tuo `~/.claude/settings.json` contiene le tue configurazioni, e va **fuso**,
+mai sovrascritto.
+
+````text
+Installa Claude HUD da https://github.com/jenz26/claude-hud su questa macchina.
+
+Leggi prima il README del repository e seguilo. Prima di cominciare verifica
+che Git Bash e jq siano disponibili. Se jq manca, fermati e dimmi come
+installarlo invece di aggirare il problema.
+
+Cosa fare:
+
+1. Scarica claude-hud.sh e claude-hud-widget.ps1 dal repo e mettili in
+   ~/.claude/
+2. Registra i sette hook in ~/.claude/settings.json, usando il blocco JSON del
+   README
+3. Metti claude-hud.cmd sul mio Desktop
+4. Dimmi come avviarlo e come verificare che funzioni
+
+Regole per il passo 2, perche' quel file contiene le mie configurazioni:
+
+- Fanne una copia in ~/.claude/settings.json.bak prima di toccarlo
+- FONDI il blocco hooks, non sovrascrivere il file. Se esiste gia' una sezione
+  "hooks" con altri eventi, aggiungi i miei accanto ai suoi e lascia tutto il
+  resto esattamente com'e'. Se uno di questi sette eventi e' gia' collegato a
+  qualcos'altro, fermati e chiedimi invece di indovinare
+- Mostrami il diff prima di scrivere
+- Verifica il risultato con: jq . ~/.claude/settings.json
+  Se non e' JSON valido, Claude Code scarta l'intero file in silenzio e non
+  funziona niente
+- Nei comandi degli hook usa "$HOME", non "${CLAUDE_PROJECT_DIR}". Questi hook
+  sono globali e devono scattare in qualunque cartella, mentre
+  CLAUDE_PROJECT_DIR punterebbe al progetto aperto in quel momento
+
+Se qualcosa nella mia installazione non e' come il README si aspetta, fermati e
+chiedimi invece di indovinare.
+````
+
+Se preferisci farlo a mano, gli stessi passi sono qui sotto.
+
+## Installazione a mano
 
 Quattro passi. Il secondo modifica un file che può già contenere tue
 configurazioni, quindi leggilo prima di incollare.
