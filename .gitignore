@@ -1,0 +1,11 @@
+# Windows
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Backups made during install
+*.bak
+
+# Editors
+.vscode/
+.idea/
