@@ -159,9 +159,15 @@ replace them.
 Launch it twice and the second instance exits on its own; a mutex keeps it to
 one.
 
-On startup the widget **deletes leftover state files** so dead sessions do not
-linger. Live sessions reappear on their next event, so the list can be short for
-a few seconds.
+A window you dragged **stays where you put it**, and keeps growing away from the
+edge you left it on.
+
+The widget deliberately does **not** clear state files on startup. Dead sessions
+are removed by the 30-minute rule on the first tick anyway, and clearing eagerly
+would drop the sessions that matter most: only `running` is refreshed by the
+`PostToolUse` heartbeat, while `done`, `idle` and `waiting` come from events that
+fire once. A session stopped at a permission prompt sends nothing more until you
+answer it, so wiping its file would hide it forever.
 
 ## Status colours
 

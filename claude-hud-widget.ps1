@@ -46,11 +46,18 @@ $created = $false
 $mutex = New-Object System.Threading.Mutex($true, 'Local\ClaudeHudWidget', [ref]$created)
 if (-not $created) { exit 0 }
 
-# Partenza pulita: via i file delle sessioni morte. Quelle vive si riscrivono
-# al primo hook, quindi possono mancare per qualche secondo.
-if (Test-Path $HudDir) {
-  Get-ChildItem -Path $HudDir -File -Force | Remove-Item -Force -ErrorAction SilentlyContinue
-}
+# NIENTE pulizia dei file di stato all'avvio, ed e' una scelta.
+#
+# Cancellarli sembra dare una "partenza pulita", ma il presupposto - che le
+# sessioni vive si riscrivano al primo hook - vale solo per "running", tenuto
+# fresco dall'heartbeat di PostToolUse. Gli altri stati nascono da eventi che
+# scattano UNA volta sola: Stop per "done", SessionStart per "idle", e
+# Notification per "waiting". Cancellandoli, un riavvio del widget faceva
+# sparire per sempre proprio la riga blu di una sessione ferma su un permesso,
+# cioe' il caso che questo strumento esiste per segnalare.
+#
+# Le sessioni davvero morte le toglie gia' la regola di $OrphanAfter dentro
+# Update-Rows, al primo giro.
 
 # ------------------------------------------------------------------ colori
 function Get-Brush([int]$a, [int]$r, [int]$g, [int]$b) {
@@ -101,7 +108,17 @@ $border.Child = $stack
 
 # Senza barra del titolo servono due gesti espliciti, altrimenti la finestra
 # non si puo' ne' spostare ne' chiudere.
-$win.Add_MouseLeftButtonDown({ try { $win.DragMove() } catch { } })
+$win.Add_MouseLeftButtonDown({
+  try {
+    $win.DragMove()          # blocca finche' non rilasci il pulsante
+    # Da qui comanda la posizione scelta a mano. Senza memorizzarla, il primo
+    # cambio di stato chiamerebbe Set-Position e la finestra tornerebbe
+    # nell'angolo: il gesto "trascina per spostare" sarebbe una promessa falsa.
+    $script:UserLeft = $win.Left
+    $script:UserEdge = if ($Anchor -like 'Bottom*') { $win.Top + $win.ActualHeight } else { $win.Top }
+    $script:UserMoved = $true
+  } catch { }
+})
 $win.Add_MouseRightButtonUp({ $win.Close() })
 
 # ------------------------------------------------------------------ righe
@@ -194,6 +211,9 @@ function Invoke-HudSound([string]$spec) {
 # il costo non dipende da quanto sono lunghe le righe.
 $script:TitleCache = @{}
 $script:LastSig    = $null   # righe disegnate l'ultima volta, per non ridisegnare a vuoto
+$script:UserMoved  = $false  # true dopo un trascinamento: da li' comanda l'utente
+$script:UserLeft   = 0
+$script:UserEdge   = 0       # bordo da tenere fermo: inferiore o superiore secondo $Anchor
 $TailBytes = 1048576         # quanto leggere dal fondo del transcript
 
 function Read-TranscriptTail([string]$path) {
@@ -266,7 +286,11 @@ function Update-Rows {
   if (Test-Path $HudDir) {
     foreach ($f in Get-ChildItem -Path $HudDir -File -Force -ErrorAction SilentlyContinue) {
       $line = ''
-      try { $line = (Get-Content $f.FullName -TotalCount 1 -ErrorAction Stop) } catch { continue }
+      # -Encoding UTF8 non e' facoltativo: claude-hud.sh scrive UTF-8, mentre
+      # Get-Content in PowerShell 5.1 assume il codepage ANSI sui file senza
+      # BOM. Senza, "citta'" con l'accento arriva qui come "cittA " e il nome
+      # del progetto esce storto.
+      try { $line = (Get-Content $f.FullName -TotalCount 1 -Encoding UTF8 -ErrorAction Stop) } catch { continue }
       if (-not $line) { continue }
 
       $p = $line -split '\|', 5
@@ -351,6 +375,18 @@ function Update-Rows {
 # L'altezza cambia a ogni sessione che entra o esce: ancorando in basso va
 # ricalcolata ogni volta, altrimenti la finestra scivola fuori dallo schermo.
 function Set-Position {
+  # Se l'hai spostata a mano, vince la tua posizione. Per le ancore in basso si
+  # conserva il BORDO INFERIORE e non il vertice: la finestra cresce verso
+  # l'alto, quindi tenere fermo Top la farebbe scivolare giu' a ogni riga in
+  # piu'. Cosi' invece resta dove l'hai messa e continua a crescere in su.
+  if ($script:UserMoved) {
+    $uh = $win.ActualHeight; if ($uh -le 0) { $uh = 40 }
+    $win.Left = $script:UserLeft
+    if ($Anchor -like 'Bottom*') { $win.Top = $script:UserEdge - $uh }
+    else                         { $win.Top = $script:UserEdge }
+    return
+  }
+
   $wa = [System.Windows.SystemParameters]::WorkArea
   $w  = $win.ActualWidth;  if ($w -le 0) { $w = $Width }
   $h  = $win.ActualHeight; if ($h -le 0) { $h = 40 }

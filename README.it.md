@@ -158,9 +158,16 @@ li sostituiscono.
 
 Se lo lanci due volte, la seconda istanza esce da sola: un mutex lo tiene a una.
 
-All'avvio il widget **cancella i file di stato residui**, per non mostrare
-sessioni morte. Quelle vive ricompaiono al loro primo evento successivo, quindi
-per qualche secondo la lista può essere più corta del vero.
+Se lo sposti trascinandolo, **resta dove l'hai messo**, e continua a crescere
+allontanandosi dal bordo su cui l'hai lasciato.
+
+Il widget di proposito **non** cancella i file di stato all'avvio. Le sessioni
+morte le toglie comunque la regola dei 30 minuti al primo giro, mentre
+cancellare subito farebbe sparire proprio quelle che contano: solo `running`
+viene rinfrescato dall'heartbeat di `PostToolUse`, mentre `done`, `idle` e
+`waiting` nascono da eventi che scattano una volta sola. Una sessione ferma su
+una richiesta di permesso non manda più niente finché non rispondi, quindi
+cancellarne il file la nasconderebbe per sempre.
 
 ## Colori dei pallini
 
