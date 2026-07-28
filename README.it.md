@@ -169,15 +169,26 @@ viene rinfrescato dall'heartbeat di `PostToolUse`, mentre `done`, `idle` e
 una richiesta di permesso non manda più niente finché non rispondi, quindi
 cancellarne il file la nasconderebbe per sempre.
 
-## Colori dei pallini
+## L'indicatore di stato
 
-| Colore | Stato |
-|---|---|
-| Giallo | Turno in corso |
-| Verde | Turno concluso |
-| Rosso | Errore |
-| Blu | Aspetta un permesso o un input |
-| Grigio | Ferma, oppure zitta da più di 5 minuti |
+L'indicatore a destra dice lo stato due volte, con la **forma** e col colore:
+
+| Forma | Colore | Stato |
+|---|---|---|
+| Cerchio | Giallo | Turno in corso |
+| Quadrato | Verde | Turno concluso |
+| Triangolo | Rosso | Errore |
+| Rombo | Blu | Aspetta un permesso o un input |
+| Puntino | Grigio | Ferma, oppure zitta da più di 5 minuti |
+
+Cerchio e quadrato sono la metafora di play e stop: tondo vuol dire che gira,
+squadrato che si è fermato. Il triangolo è l'unica forma appuntita, perché un
+errore è la cosa che non deve mai essere scambiata per qualcos'altro.
+
+Il colore da solo non basterebbe. Circa un uomo su dodici ha una qualche forma
+di discromatopsia, e verde/rosso è proprio l'asse che collassa — cioè la coppia
+che qui significa "concluso" ed "errore". Con forme diverse il colore diventa
+rinforzo invece che unico segnale.
 
 La barretta colorata a sinistra è il colore **Peacock** del progetto, letto dal
 suo `.vscode/settings.json` (`peacock.color` o `titleBar.activeBackground`). Se

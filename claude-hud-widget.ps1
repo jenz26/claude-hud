@@ -135,6 +135,49 @@ $menu.Items.Add($miClose) | Out-Null
 $win.ContextMenu = $menu
 
 # ------------------------------------------------------------------ righe
+# L'indicatore cambia FORMA oltre che colore, e non e' decorazione: il colore da
+# solo non basta a chi ha una discromatopsia, e verde/rosso e' proprio l'asse che
+# collassa piu' spesso. Con le forme il colore diventa rinforzo, non unico segnale.
+#
+#   cerchio    running   gira
+#   quadrato   done      fermo   (la metafora e' play/stop)
+#   rombo      waiting   aspetta te
+#   triangolo  error     avvertimento, l'unica forma appuntita
+#   puntino    idle/stale  piccolo, si legge come sbiadito
+#
+# Il quadrato e' 9 e non 10: a parita' di lato l'occhio lo vede piu' pesante
+# del cerchio.
+function New-Poly([int[][]]$pts) {
+  $p = New-Object System.Windows.Shapes.Polygon
+  $pc = New-Object System.Windows.Media.PointCollection
+  foreach ($xy in $pts) { $pc.Add((New-Object System.Windows.Point $xy[0], $xy[1])) }
+  $p.Points = $pc
+  return $p
+}
+
+function New-StateShape([string]$state) {
+  switch ($state) {
+    'done' {
+      $s = New-Object System.Windows.Shapes.Rectangle
+      $s.Width = 9; $s.Height = 9; $s.RadiusX = 1; $s.RadiusY = 1
+    }
+    'waiting' { $s = New-Poly @(@(5,0),@(10,5),@(5,10),@(0,5)) }
+    'error'   { $s = New-Poly @(@(5,0),@(10,9),@(0,9))         }
+    'running' {
+      $s = New-Object System.Windows.Shapes.Ellipse
+      $s.Width = 10; $s.Height = 10
+    }
+    default {
+      $s = New-Object System.Windows.Shapes.Ellipse
+      $s.Width = 5; $s.Height = 5
+    }
+  }
+  $s.Fill = Get-StateBrush $state
+  $s.HorizontalAlignment = 'Right'
+  $s.VerticalAlignment   = 'Center'
+  return $s
+}
+
 function New-Cell([string]$text, [double]$w, $brush, [int]$col) {
   $t = New-Object System.Windows.Controls.TextBlock
   $t.Text          = $text
@@ -169,11 +212,7 @@ function New-Row($state, $color, $proj, $title) {
   $g.Children.Add((New-Cell $proj  ($ProjWidth - 6) (Get-Brush 255 220 220 225) 1)) | Out-Null
   $g.Children.Add((New-Cell $title 0               (Get-Brush 255 150 150 158) 2)) | Out-Null
 
-  $dot = New-Object System.Windows.Shapes.Ellipse
-  $dot.Width = 8; $dot.Height = 8
-  $dot.Fill = Get-StateBrush $state
-  $dot.HorizontalAlignment = 'Right'
-  $dot.VerticalAlignment   = 'Center'
+  $dot = New-StateShape $state
   [System.Windows.Controls.Grid]::SetColumn($dot, 3)
   $g.Children.Add($dot) | Out-Null
 

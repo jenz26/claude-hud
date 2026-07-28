@@ -169,15 +169,26 @@ would drop the sessions that matter most: only `running` is refreshed by the
 fire once. A session stopped at a permission prompt sends nothing more until you
 answer it, so wiping its file would hide it forever.
 
-## Status colours
+## Status indicator
 
-| Colour | Meaning |
-|---|---|
-| Yellow | Turn in progress |
-| Green | Turn finished |
-| Red | Error |
-| Blue | Waiting for a permission or input |
-| Grey | Idle, or silent for more than 5 minutes |
+The indicator on the right carries the state twice, in **shape** and in colour:
+
+| Shape | Colour | Meaning |
+|---|---|---|
+| Circle | Yellow | Turn in progress |
+| Square | Green | Turn finished |
+| Triangle | Red | Error |
+| Diamond | Blue | Waiting for a permission or input |
+| Small dot | Grey | Idle, or silent for more than 5 minutes |
+
+Circle and square are the play/stop metaphor: round means it is running, blocky
+means it has stopped. The triangle is the only pointed shape, because an error
+is the one thing that must never be mistaken for something else.
+
+Colour alone would not be enough. Roughly one man in twelve has some form of
+colour blindness, and red/green is exactly the axis that collapses — the pair
+that here means "error" and "finished". With distinct shapes the colour becomes
+reinforcement rather than the only signal.
 
 The coloured bar on the left is the project's **Peacock** colour, read from its
 `.vscode/settings.json` (`peacock.color` or `titleBar.activeBackground`). No
