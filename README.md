@@ -6,13 +6,10 @@ status dot.
 
 *[Italiano](README.it.md)*
 
-```
-┌──────────────────────────────────────┐
-│ ▍my-api        Refactor auth middle… ●│  ← yellow: working
-│ ▍frontend      Fix responsive navbar ●│  ← green:  finished
-│ ▍data-pipeline Add retry to ingestion●│  ← blue:   waiting for you
-└──────────────────────────────────────┘
-```
+![Claude HUD in action](demo.gif)
+
+Sessions appear as they start, the dot turns green when a turn ends, and blue
+when one is waiting for you to approve something.
 
 No title bar, no tabs, no taskbar entry. It sits in a corner and grows upward as
 sessions come and go.

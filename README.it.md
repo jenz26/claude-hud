@@ -6,13 +6,10 @@ progetto, il nome della chat e un pallino di stato.
 
 *[English](README.md)*
 
-```
-┌──────────────────────────────────────┐
-│ ▍mia-api       Refactor middleware a…●│  ← giallo: sta lavorando
-│ ▍frontend      Sistema la navbar     ●│  ← verde:  ha finito
-│ ▍data-pipeline Aggiungi retry all'in…●│  ← blu:    aspetta te
-└──────────────────────────────────────┘
-```
+![Claude HUD in azione](demo.gif)
+
+Le sessioni compaiono man mano che partono, il pallino diventa verde quando un
+turno finisce e blu quando una sessione aspetta che tu approvi qualcosa.
 
 Niente barra del titolo, niente tab, niente icona nella barra delle
 applicazioni. Sta in un angolo e cresce man mano che le sessioni vanno e vengono.
