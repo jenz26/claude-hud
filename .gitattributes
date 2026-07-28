@@ -1,0 +1,14 @@
+# Line endings matter here.
+#
+# claude-hud.sh MUST stay LF: Git for Windows defaults to converting to CRLF on
+# checkout, and a lone \r in the shebang makes bash answer "bad interpreter".
+#
+# claude-hud.cmd MUST stay CRLF: batch files are parsed by cmd.exe, which is not
+# reliable with LF-only line endings.
+
+* text=auto
+
+*.sh   text eol=lf
+*.ps1  text eol=crlf
+*.cmd  text eol=crlf
+*.md   text eol=lf
