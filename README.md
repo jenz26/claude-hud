@@ -2,14 +2,15 @@
 
 A tiny always-on-top widget that shows every Claude Code session running on your
 machine: one row per session, with the project's colour, the chat name, and a
-status dot.
+status indicator.
 
 *[Italiano](README.it.md)*
 
 ![Claude HUD in action](demo.gif)
 
-Sessions appear as they start, the dot turns green when a turn ends, and blue
-when one is waiting for you to approve something.
+Sessions appear as they start. A round yellow marker means the session is
+working; it becomes a green square when the turn ends, and a blue diamond when
+the session is waiting for you to approve something.
 
 No title bar, no tabs, no taskbar entry. It sits in a corner and grows upward as
 sessions come and go.

@@ -2,14 +2,15 @@
 
 Un widget minuscolo, sempre in primo piano, che mostra tutte le sessioni di
 Claude Code aperte sulla macchina: una riga per sessione, con il colore del
-progetto, il nome della chat e un pallino di stato.
+progetto, il nome della chat e un indicatore di stato.
 
 *[English](README.md)*
 
 ![Claude HUD in azione](demo.gif)
 
-Le sessioni compaiono man mano che partono, il pallino diventa verde quando un
-turno finisce e blu quando una sessione aspetta che tu approvi qualcosa.
+Le sessioni compaiono man mano che partono. Un cerchio giallo vuol dire che la
+sessione sta lavorando; diventa un quadrato verde a turno finito, e un rombo blu
+quando aspetta che tu approvi qualcosa.
 
 Niente barra del titolo, niente tab, niente icona nella barra delle
 applicazioni. Sta in un angolo e cresce man mano che le sessioni vanno e vengono.
