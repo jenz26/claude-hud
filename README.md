@@ -150,8 +150,8 @@ It does not start at login. If you want that, put a shortcut to the launcher in
 
 | Gesture | Effect |
 |---|---|
-| Left-drag | Move the window |
-| Right-click | Close the widget |
+| Left-drag | Move the window — it stays where you put it |
+| Right-click | Opens a small menu with **Close** |
 
 There is no title bar, so there are no window buttons — these two gestures
 replace them.
@@ -290,7 +290,7 @@ lines like:
 ```
 
 If it is not available yet the widget falls back to the last prompt, and failing
-that shows `(nuova sessione)` — see the note on language below.
+that shows `(new session)`.
 
 ### Terminal modes
 
@@ -355,7 +355,10 @@ and find nothing.
 is a JSON event that can weigh tens of KB with attachments and tool output. In a
 real transcript the last megabyte held 51 lines, and `-Tail 120` blocked for
 minutes. The widget reads a fixed byte window from the end (`$TailBytes`, 1 MB),
-so the cost does not depend on line length: 10–140 ms per session.
+so the cost does not depend on line length: about 2.7 ms per read once the file
+is in the OS cache, and it only re-reads when the transcript changes. Shrinking
+the window to 64 KB saves roughly 1.5 ms and buys a chance of missing the title
+when a large attachment sits at the end — not a trade worth making.
 
 **The widget skips the redraw when nothing changed**, by comparing a signature of
 the rows against the previous tick. Rebuilding the visual tree every second cost
@@ -374,14 +377,10 @@ sets `LC_ALL` for the same reason.
 
 ## A note on language
 
-The inline comments in `claude-hud.sh` and `claude-hud-widget.ps1` are in
-Italian, and so are the few strings the tool shows: `(nuova sessione)` for a
-session whose name is not known yet, and `nessuna sessione attiva` when nothing
-is running.
-
-The comments explain the non-obvious decisions rather than restating the code,
-so they are worth reading even through a translator. Pull requests translating
-either the comments or the visible strings are welcome.
+Everything the tool shows is in English. The inline comments in `claude-hud.sh`
+and `claude-hud-widget.ps1` are in Italian: they explain the non-obvious
+decisions rather than restating the code, so they are worth reading even through
+a translator. Pull requests translating them are welcome.
 
 ## License
 

@@ -150,8 +150,8 @@ Non parte da solo al login. Se lo vuoi, metti un collegamento al lanciatore in
 
 | Gesto | Effetto |
 |---|---|
-| Trascina col tasto sinistro | Sposta la finestra |
-| Tasto destro | Chiude il widget |
+| Trascina col tasto sinistro | Sposta la finestra — resta dove la metti |
+| Tasto destro | Apre un menù con **Close** |
 
 Non c'è barra del titolo, quindi non ci sono i soliti pulsanti: questi due gesti
 li sostituiscono.
@@ -290,7 +290,8 @@ contiene righe così:
 ```
 
 Se non è ancora disponibile, il widget ripiega sull'ultimo prompt; mancando
-entrambi mostra `(nuova sessione)`.
+entrambi mostra `(new session)`. Le stringhe a video sono in inglese, i commenti
+nel codice in italiano.
 
 ### Modalità da terminale
 
@@ -355,7 +356,10 @@ dimensione: ogni riga è un evento JSON che con allegati e output di tool pesa
 decine di KB. In un transcript reale l'ultimo megabyte conteneva 51 righe, e
 `-Tail 120` bloccava per minuti. Il widget legge una finestra fissa di byte dal
 fondo (`$TailBytes`, 1 MB), così il costo non dipende dalla lunghezza delle
-righe: 10-140 ms per sessione.
+righe: circa 2,7 ms per lettura quando il file è nella cache del sistema, e
+rilegge solo se il transcript cambia. Ridurre la finestra a 64 KB risparmia
+circa 1,5 ms e in cambio rischia di mancare il titolo quando in coda c'è un
+allegato grosso: non conviene.
 
 **Il widget salta il ridisegno se niente è cambiato**, confrontando una firma
 delle righe con quella del giro precedente. Ricostruire l'interfaccia ogni

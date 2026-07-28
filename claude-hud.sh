@@ -211,7 +211,10 @@ cmd_event() {
   sid="$(printf '%s' "$json" | "$JQ" -r '.session_id      // ""' 2>/dev/null)"
   cwd="$(printf '%s' "$json" | "$JQ" -r '.cwd             // ""' 2>/dev/null)"
   [ -n "$sid" ] || return 0
-  case "$sid" in */*|..*) return 0 ;; esac          # niente path traversal nel nome file
+  # niente path traversal nel nome file. Il backslash serve perche' su Windows
+  # e' un separatore quanto lo slash, anche se qui gli id sono UUID e non ci
+  # arriverebbe mai: costa un pattern in piu'.
+  case "$sid" in */*|*\\*|..*) return 0 ;; esac
 
   local f="$HUD_DIR/$sid"
 
@@ -238,6 +241,18 @@ cmd_event() {
     IFS='|' read -r old_state old_ts old_color old_proj old_title < "$f" || true
   fi
 
+  # Gli hook sono tutti async, quindi l'ordine di arrivo non e' garantito: il
+  # PostToolUse dell'ultimo tool puo' finire DOPO lo Stop. Se succede, il
+  # battito riscriverebbe "running" sopra "done" e la riga resterebbe gialla
+  # fino allo stale, cioe' cinque minuti di bugia proprio a turno finito.
+  # Il battito serve a tenere fresco il timestamp di una sessione al lavoro,
+  # non a resuscitarla: se il turno e' gia' chiuso, non ha niente da dire.
+  # Sicuro, perche' per avere altri tool serve un nuovo UserPromptSubmit, che
+  # rimette "running" per conto suo.
+  if [ "$ev" = "PostToolUse" ]; then
+    case "$old_state" in done|error) return 0 ;; esac
+  fi
+
   # il titolo lo prendiamo dal prompt dell'utente e poi lo conserviamo
   title=""
   if [ "$ev" = "UserPromptSubmit" ]; then
@@ -248,7 +263,7 @@ cmd_event() {
     title="$(sanitize "$title" | cut -c1-80)"
   fi
   [ -n "$title" ] || title="$old_title"
-  [ -n "$title" ] || title="(nuova sessione)"
+  [ -n "$title" ] || title="(new session)"
 
   root="$(find_root "$cwd")"
   if [ -n "$root" ]; then
@@ -303,13 +318,13 @@ render_once() {
         "$(dot_color "$state")" "$DOT"
     done | sort -f | cut -f2-
   )"
-  [ -n "$out" ] || out=$'\033[90mnessuna sessione attiva\033[0m'
+  [ -n "$out" ] || out=$'\033[90mno active sessions\033[0m'
   printf '%s\n' "$out" | while IFS= read -r line; do printf '%s\033[K\n' "$line"; done
   printf '\033[J'
 }
 
 cmd_watch() {
-  resolve_jq || echo "attenzione: jq non trovato, gli hook non scriveranno nulla" >&2
+  resolve_jq || echo "warning: jq not found, the hooks will write nothing" >&2
   shopt -s nullglob
   printf '\033[?25l'
   trap 'printf "\033[?25h\n"; exit 0' INT TERM
@@ -326,5 +341,5 @@ case "${1:-}" in
   event) cmd_event; exit 0 ;;
   watch) cmd_watch ;;
   once)  shopt -s nullglob; render_once ;;   # comodo per i test
-  *) echo "uso: $0 {event|watch|once}" >&2; exit 1 ;;
+  *) echo "usage: $0 {event|watch|once}" >&2; exit 1 ;;
 esac

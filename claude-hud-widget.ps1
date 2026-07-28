@@ -78,7 +78,11 @@ function Get-HexBrush([string]$hex) {
 function Get-StateBrush([string]$state) {
   switch ($state) {
     'running' { Get-Brush 255 229 192 123 }   # giallo  - turno in corso
-    'done'    { Get-Brush 255 152 195 121 }   # verde   - turno concluso
+    # Verde #3fb950 e non il #98c379 di prima: contro il giallo di "running" la
+    # distanza percettiva passa da 33 a 61 e la luminanza da 74 a 67, quindi si
+    # separano per tinta E per chiarezza. Erano la coppia messa peggio di tutte,
+    # ed e' la distinzione che serve piu' spesso: ha finito o sta lavorando.
+    'done'    { Get-Brush 255  63 185  80 }   # verde   - turno concluso
     'error'   { Get-Brush 255 224 108 117 }   # rosso   - errore
     'waiting' { Get-Brush 255  97 175 239 }   # blu     - aspetta input
     default   { Get-Brush 255  92  99 112 }   # grigio  - idle o fermo
@@ -119,7 +123,16 @@ $win.Add_MouseLeftButtonDown({
     $script:UserMoved = $true
   } catch { }
 })
-$win.Add_MouseRightButtonUp({ $win.Close() })
+# Un menu' contestuale invece della chiusura secca col tasto destro: senza
+# icona nella tray da cui riaprirlo, un click sbagliato faceva sparire il
+# widget. Il click in piu' basta a evitare l'incidente, ed e' il comportamento
+# che su Windows ci si aspetta.
+$menu = New-Object System.Windows.Controls.ContextMenu
+$miClose = New-Object System.Windows.Controls.MenuItem
+$miClose.Header = 'Close Claude HUD'
+$miClose.Add_Click({ $win.Close() })
+$menu.Items.Add($miClose) | Out-Null
+$win.ContextMenu = $menu
 
 # ------------------------------------------------------------------ righe
 function New-Cell([string]$text, [double]$w, $brush, [int]$col) {
@@ -268,7 +281,7 @@ function Get-ChatName([string]$sid) {
   } catch { }
 
   # niente titolo in questa lettura: tengo l'ultimo buono invece di far
-  # lampeggiare la riga tornando a "(nuova sessione)"
+  # lampeggiare la riga tornando a "(new session)"
   if (-not $title -and $c) { $title = $c.Title }
 
   $stamp = 0
@@ -312,7 +325,7 @@ function Update-Rows {
       # Il nome della chat batte quello che scrive l'hook: descrive la sessione
       # invece dell'ultimo prompt, e c'e' anche quando l'hook non ha mai visto
       # un UserPromptSubmit, cioe' proprio nei casi che mostravano
-      # "(nuova sessione)". Se manca, resta quello dell'hook.
+      # "(new session)". Se manca, resta quello dell'hook.
       $chat = Get-ChatName $f.Name
       if ($chat) { $title = $chat }
 
@@ -339,6 +352,10 @@ function Update-Rows {
   foreach ($k in @($script:PrevState.Keys)) {
     if (-not $seen.ContainsKey($k)) { $script:PrevState.Remove($k) }
   }
+  # stessa potatura per la cache dei titoli, che altrimenti cresceva per sempre
+  foreach ($k in @($script:TitleCache.Keys)) {
+    if (-not $seen.ContainsKey($k)) { $script:TitleCache.Remove($k) }
+  }
 
   # Un solo suono per giro anche se piu' sessioni cambiano insieme, e la
   # priorita' e' quella che richiede piu' attenzione.
@@ -357,7 +374,7 @@ function Update-Rows {
 
   $stack.Children.Clear()
   if ($rows.Count -eq 0) {
-    $empty = New-Cell 'nessuna sessione attiva' 0 (Get-Brush 255 110 110 118) 0
+    $empty = New-Cell 'no active sessions' 0 (Get-Brush 255 110 110 118) 0
     $stack.Children.Add($empty) | Out-Null
   } else {
     foreach ($r in ($rows | Sort-Object Proj, Title)) {
